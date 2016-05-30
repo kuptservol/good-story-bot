@@ -1,5 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.repository;
 
+import com.codahale.metrics.annotation.Counted;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -74,7 +75,7 @@ public class UpdatesRepository {
         repositoryExecutor.shutdownNow();
     }
 
-    protected UpdateEvents createUpdateEvents(List<Update> updates) {
+    private UpdateEvents createUpdateEvents(List<Update> updates) {
         return UpdateEvents.builder()
                 .updateEventList(updates.stream().map(update -> UpdateEvent.builder()
                         .update(update)

@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(value = {
         UpdatesRepositoryConfiguration.class,
-        TelegramBotClientConfiguration.class
+        TelegramBotClientConfiguration.class,
+        NextOffSetStrategyConfiguration.class,
+        UpdatesWorkerRepositoryConfiguration.class
 })
 @EnableAutoConfiguration(exclude = {
         org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class,})

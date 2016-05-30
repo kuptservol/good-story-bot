@@ -1,5 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.client.impl;
 
+import com.codahale.metrics.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.objects.Update;
@@ -25,6 +26,7 @@ public class TelegramBotApiImpl implements TelegramBotApi {
     private TelegramBotHttpClient client;
 
     @Override
+    @Timed(name = "bot.api.client.getNextUpdates", absolute = true)
     public List<Update> getNextUpdates(Integer poolingLimit, Integer poolingTimeout) {
         List<Update> updates = client.executeGet(
                 "getUpdates",

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.skuptsov.telegram.bot.goodstory.model.UpdateEvents;
+import ru.skuptsov.telegram.bot.goodstory.worker.saver.UpdatesWorkerRepository;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -23,10 +24,14 @@ public class UpdatesWorker {
     @Autowired
     private EventBus eventBus;
 
+    @Autowired
+    private UpdatesWorkerRepository updatesWorkerRepository;
+
     @AllowConcurrentEvents
     @Subscribe
     public void handleUpdateEvents(@NotNull UpdateEvents updateEvents) {
         logger.debug("Received event {}", updateEvents);
+        updatesWorkerRepository.save(updateEvents);
     }
 
     @PostConstruct
