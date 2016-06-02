@@ -1,9 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.joda.time.DateTime;
 import org.telegram.telegrambots.api.objects.Update;
 import ru.skuptsov.telegram.bot.goodstory.processor.EventProcessor;
@@ -15,6 +12,7 @@ import ru.skuptsov.telegram.bot.goodstory.processor.EventProcessor;
 @Getter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UpdateEvent {
     public final static UpdateEvent EMPTY = new UpdateEvent();

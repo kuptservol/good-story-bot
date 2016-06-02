@@ -1,6 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.config;
 
-import com.google.common.eventbus.EventBus;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import lombok.Getter;
@@ -9,23 +9,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.skuptsov.telegram.bot.goodstory.client.TelegramBotApi;
+import ru.skuptsov.telegram.bot.goodstory.client.TelegramBotHttpClient;
 import ru.skuptsov.telegram.bot.goodstory.client.impl.TelegramBotApiImpl;
+import ru.skuptsov.telegram.bot.goodstory.client.impl.TelegramBotHttpClientImpl;
 
 /**
  * @author Sergey Kuptsov
- * @since 22/05/2016
+ * @since 01/06/2016
  */
 @Configuration
 @Getter
-public class UpdatesRepositoryConfiguration {
+public class ApiCommandSenderConfiguration {
 
-    @Value("${repository.client.pooling.timeout.sec:100}")
-    private Integer poolingTimeout;
+    @Value("${api.command.sender.task.thread.size:4}")
+    private Integer threadCount;
 
-    @Value("${repository.client.pooling.limit:20}")
-    private Integer poolingLimit;
+    @Value("${api.command.sender.task.queue.size:2048}")
+    private Integer queueSize;
 
-    @Value("${telegram.client.maxConnectionsPerHost:1}")
+    @Value("${telegram.client.maxConnectionsPerHost:4}")
     private Integer maxConnectionsPerHost;
 
     @Value("${telegram.client.maxRequestRetry:2}")
@@ -40,15 +42,10 @@ public class UpdatesRepositoryConfiguration {
     @Value("${telegram.client.allowPoolingConnections:true}")
     private Boolean allowPoolingConnections;
 
-    @Bean
-    public EventBus getEventBus() {
-        return new EventBus();
-    }
-
     @Autowired
     private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
-    @Bean(name = "updateRepositoryBotApi")
+    @Bean(name = "commandSenderBotApi")
     public TelegramBotApi telegramBotApi() {
         return new TelegramBotApiImpl(telegramBotClientConfiguration.createTelegramBotClient(getClient()));
     }

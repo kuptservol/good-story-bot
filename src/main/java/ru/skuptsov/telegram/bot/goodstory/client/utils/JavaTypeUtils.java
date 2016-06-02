@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.client;
+package ru.skuptsov.telegram.bot.goodstory.client.utils;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;

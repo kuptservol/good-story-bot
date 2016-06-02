@@ -16,8 +16,15 @@ public interface TelegramBotHttpClient {
                      @Nullable Map<String, String> params,
                      @NotNull JavaType returnType) throws TelegramBotApiException;
 
+    void executeGetAsync(@NotNull String method,
+                         @Nullable Map<String, String> params);
+
     <T, V> T executePost(
             @NotNull String method,
             @Nullable V requestObject,
             @NotNull JavaType returnType) throws TelegramBotApiException;
+
+    <V> void executePostAsync(
+            @NotNull String method,
+            @Nullable V requestObject);
 }

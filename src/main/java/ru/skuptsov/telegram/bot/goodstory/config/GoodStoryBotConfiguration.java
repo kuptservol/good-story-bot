@@ -14,10 +14,12 @@ import org.springframework.context.annotation.Import;
         UpdatesRepositoryConfiguration.class,
         TelegramBotClientConfiguration.class,
         NextOffSetStrategyConfiguration.class,
-        UpdatesWorkerRepositoryConfiguration.class
+        UpdatesWorkerRepositoryConfiguration.class,
+        WorkerConfiguration.class,
+        ApiCommandSenderConfiguration.class
 })
 @EnableAutoConfiguration(exclude = {
         org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class,})
 @ComponentScan(value = "ru.skuptsov.telegram.bot.goodstory")
-public class ApplicationConfiguration {
+public class GoodStoryBotConfiguration {
 }

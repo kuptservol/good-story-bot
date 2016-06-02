@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class UpdatesWorkerRepositoryConfiguration {
 
-    @Value("${updates.worker.repository.queue.size:50}")
+    @Value("${updates.worker.repository.queue.size:2048}")
     private Integer queueSize;
 
     @Value("${updates.worker.repository.queue.block:true}")

@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="ru.skuptsov.telegram.bot.goodstory" level="DEBUG" additivity="false">
+    <logger name="ru.skuptsov.telegram.bot.goodstory" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

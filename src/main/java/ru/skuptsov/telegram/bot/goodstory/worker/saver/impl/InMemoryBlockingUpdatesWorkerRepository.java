@@ -56,9 +56,11 @@ public class InMemoryBlockingUpdatesWorkerRepository implements UpdatesWorkerRep
 
     @PostConstruct
     public void init() {
-        updatesQueue = new ArrayBlockingQueue<UpdateEvent>(updatesWorkerRepositoryConfiguration.getQueueSize());
+        updatesQueue = new ArrayBlockingQueue<>(updatesWorkerRepositoryConfiguration.getQueueSize());
         if (updatesWorkerRepositoryConfiguration.getBlock()) {
             updatesSaver = new BlockingUpdatesSaver(updatesQueue);
+        } else {
+            updatesSaver = new NonBlockingUpdatesSaver(updatesQueue);
         }
     }
 }

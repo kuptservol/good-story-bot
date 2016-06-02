@@ -3,10 +3,7 @@ package ru.skuptsov.telegram.bot.goodstory.client.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Request;
-import com.ning.http.client.Response;
+import com.ning.http.client.*;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +23,8 @@ import static java.util.Optional.ofNullable;
  * @author Sergey Kuptsov
  * @since 22/05/2016
  */
-public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
-    private static final Logger log = LoggerFactory.getLogger(TelegramBotHttpHttpClientImpl.class);
+public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
+    private static final Logger log = LoggerFactory.getLogger(TelegramBotHttpClientImpl.class);
     private final static String BOT_PREFIX = "/bot";
 
     private final ObjectMapper jsonMapper;
@@ -36,7 +33,7 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
     private final String baseUrl;
     private final String apiUrl;
 
-    public TelegramBotHttpHttpClientImpl(
+    public TelegramBotHttpClientImpl(
             ObjectMapper jsonMapper,
             AsyncHttpClient httpClient,
             String apiToken,
@@ -62,6 +59,17 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
     }
 
     @Override
+    public void executeGetAsync(@NotNull String method,
+                                @Nullable Map<String, String> params) {
+
+        AsyncHttpClient.BoundRequestBuilder requestBuilder = httpClient.prepareGet(formUrl(method));
+
+        setParams(params, requestBuilder);
+
+        executeRequestAsync(requestBuilder.build());
+    }
+
+    @Override
     public <T, V> T executePost(
             @NotNull String method,
             @Nullable V requestObject,
@@ -74,6 +82,20 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
         setBody(requestObject, requestBuilder);
 
         return execute(requestBuilder.build(), returnType);
+    }
+
+    @Override
+    public <V> void executePostAsync(
+            @NotNull String method,
+            @Nullable V requestObject) {
+
+        AsyncHttpClient.BoundRequestBuilder requestBuilder;
+
+        requestBuilder = httpClient.preparePost(formUrl(method));
+
+        setBody(requestObject, requestBuilder);
+
+        executeRequestAsync(requestBuilder.build());
     }
 
     private <T> void setBody(@Nullable T requestObject, AsyncHttpClient.BoundRequestBuilder requestBuilder) {
@@ -104,8 +126,6 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
     private <T> T execute(Request httpRequest, JavaType returnType)
             throws TelegramBotApiException {
 
-        log.debug("Executing request : {}", httpRequest);
-
         Response httpResponse = executeRequest(httpRequest);
 
         checkHttpStatuses(httpResponse);
@@ -130,7 +150,6 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
 
         checkExecutionResult(executionResult);
 
-
         return executionResult.getResult();
     }
 
@@ -140,9 +159,10 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
         }
     }
 
-
     private Response executeRequest(Request httpRequest)
             throws TelegramBotApiException {
+
+        log.debug("Executing request : {}", httpRequest);
 
         Response httpResponse;
 
@@ -169,6 +189,22 @@ public class TelegramBotHttpHttpClientImpl implements TelegramBotHttpClient {
         }
 
         return httpResponse;
+    }
+
+    private void executeRequestAsync(Request httpRequest)
+            throws TelegramBotApiException {
+
+        log.debug("Executing request : {}", httpRequest);
+
+        ListenableFuture<Response> responseFuture = httpClient.executeRequest(
+                httpRequest,
+                new AsyncCompletionHandler<Response>() {
+                    @Override
+                    public Response onCompleted(Response response) throws Exception {
+                        log.debug("Response : {}", response);
+                        return response;
+                    }
+                });
     }
 
     private void checkHttpStatuses(Response httpResponse) throws TelegramBotApiException {
