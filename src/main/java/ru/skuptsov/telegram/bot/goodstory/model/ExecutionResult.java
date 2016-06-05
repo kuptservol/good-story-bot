@@ -2,6 +2,7 @@ package ru.skuptsov.telegram.bot.goodstory.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author Sergey Kuptsov
@@ -9,6 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class ExecutionResult<T> {
 
     private boolean ok;

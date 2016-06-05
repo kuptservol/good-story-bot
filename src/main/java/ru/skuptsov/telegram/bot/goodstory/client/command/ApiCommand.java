@@ -2,6 +2,8 @@ package ru.skuptsov.telegram.bot.goodstory.client.command;
 
 import ru.skuptsov.telegram.bot.goodstory.client.TelegramBotApi;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -9,14 +11,21 @@ import java.util.function.Consumer;
  * @since 31/05/2016
  */
 public interface ApiCommand<T> {
-    ApiCommand EMPTY = telegramBotApi -> new Object();
+    ApiCommand EMPTY = telegramBotApi -> {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        future.complete(new Object());
+        return future;
+    };
 
     Consumer EMPTY_CALLBACK = o -> {
     };
 
-    T execute(TelegramBotApi telegramBotApi);
+    Future<T> execute(TelegramBotApi telegramBotApi);
 
     default Consumer<T> getCallback() {
         return EMPTY_CALLBACK;
+    }
+
+    default void callback(Future<T> future) {
     }
 }

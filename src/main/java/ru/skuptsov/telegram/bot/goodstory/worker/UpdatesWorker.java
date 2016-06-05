@@ -66,7 +66,9 @@ public class UpdatesWorker extends AbstractExecutionThreadService {
             CompletableFuture.supplyAsync(
                     () -> workerTaskFactory.create(updateEvent).execute(),
                     updatesWorkerExecutor)
-                    .thenAcceptAsync(apiCommand -> apiCommandSender.sendCommand(apiCommand));
+                    .thenAcceptAsync(
+                            apiCommand -> apiCommandSender.sendCommand(apiCommand),
+                            apiCommandSenderExecutor);
         }
     }
 

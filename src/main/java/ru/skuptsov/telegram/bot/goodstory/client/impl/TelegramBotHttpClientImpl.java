@@ -3,8 +3,12 @@ package ru.skuptsov.telegram.bot.goodstory.client.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Request;
+import com.ning.http.client.Response;
 import org.apache.http.HttpStatus;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.skuptsov.telegram.bot.goodstory.client.TelegramBotHttpClient;
@@ -15,7 +19,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static java.util.Optional.ofNullable;
 
@@ -46,9 +50,9 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
     }
 
     @Override
-    public <T> T executeGet(@NotNull String method,
-                            @Nullable Map<String, String> params,
-                            @NotNull JavaType returnType) throws TelegramBotApiException {
+    public <T> Future<T> executeGet(@NotNull String method,
+                                    @Nullable Map<String, String> params,
+                                    @NotNull JavaType returnType) throws TelegramBotApiException {
 
         AsyncHttpClient.BoundRequestBuilder requestBuilder =
                 httpClient.prepareGet(formUrl(method));
@@ -59,18 +63,7 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
     }
 
     @Override
-    public void executeGetAsync(@NotNull String method,
-                                @Nullable Map<String, String> params) {
-
-        AsyncHttpClient.BoundRequestBuilder requestBuilder = httpClient.prepareGet(formUrl(method));
-
-        setParams(params, requestBuilder);
-
-        executeRequestAsync(requestBuilder.build());
-    }
-
-    @Override
-    public <T, V> T executePost(
+    public <T, V> Future<T> executePost(
             @NotNull String method,
             @Nullable V requestObject,
             @NotNull JavaType returnType) throws TelegramBotApiException {
@@ -78,24 +71,11 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
         AsyncHttpClient.BoundRequestBuilder requestBuilder;
 
         requestBuilder = httpClient.preparePost(formUrl(method));
+        requestBuilder.setHeader("Content-Type", "application/json");
 
         setBody(requestObject, requestBuilder);
 
         return execute(requestBuilder.build(), returnType);
-    }
-
-    @Override
-    public <V> void executePostAsync(
-            @NotNull String method,
-            @Nullable V requestObject) {
-
-        AsyncHttpClient.BoundRequestBuilder requestBuilder;
-
-        requestBuilder = httpClient.preparePost(formUrl(method));
-
-        setBody(requestObject, requestBuilder);
-
-        executeRequestAsync(requestBuilder.build());
     }
 
     private <T> void setBody(@Nullable T requestObject, AsyncHttpClient.BoundRequestBuilder requestBuilder) {
@@ -123,92 +103,67 @@ public class TelegramBotHttpClientImpl implements TelegramBotHttpClient {
                                 .forEach((param -> requestBuilder.addQueryParam(param.getKey(), param.getValue()))));
     }
 
-    private <T> T execute(Request httpRequest, JavaType returnType)
+    private <T> Future<T> execute(Request httpRequest, JavaType returnType)
             throws TelegramBotApiException {
 
-        Response httpResponse = executeRequest(httpRequest);
+        log.debug("Executing request : {}", httpRequest);
 
-        checkHttpStatuses(httpResponse);
+        return httpClient.executeRequest(httpRequest, createCompletionHandler(returnType));
+    }
 
-        ExecutionResult<T> executionResult;
-        try {
-            executionResult = jsonMapper.readValue(
-                    httpResponse.getResponseBodyAsBytes(),
-                    jsonMapper.getTypeFactory().constructParametrizedType(
-                            ExecutionResult.class,
-                            ExecutionResult.class,
-                            returnType));
-        } catch (IOException e) {
-            throw new TelegramBotApiException("Error while deserializing request object from response", e);
-        }
+    private <T> AsyncCompletionHandler<T> createCompletionHandler(JavaType returnType) {
+        return new AsyncCompletionHandler<T>() {
+            @Override
+            public T onCompleted(Response httpResponse) throws Exception {
+                log.debug("Got response : {}", httpResponse);
 
-        if (executionResult == null) {
-            throw new TelegramBotApiException("Response has empty result with return value");
-        }
+                try {
+                    log.debug("Got response : {}", httpResponse.getResponseBody());
+                } catch (IOException e) {
+                    log.error("Error while getting response body", e);
+                }
 
-        log.debug("Got execution result : {}", executionResult);
+                checkHttpStatuses(httpResponse);
 
-        checkExecutionResult(executionResult);
+                ExecutionResult<T> executionResult;
+                try {
+                    executionResult = jsonMapper.readValue(
+                            httpResponse.getResponseBodyAsBytes(),
+                            jsonMapper.getTypeFactory().constructParametrizedType(
+                                    ExecutionResult.class,
+                                    ExecutionResult.class,
+                                    returnType));
+                } catch (IOException e) {
+                    throw new TelegramBotApiException("Error while deserializing request object from response", e);
+                }
 
-        return executionResult.getResult();
+                if (executionResult == null) {
+                    throw new TelegramBotApiException("Response has empty result with return value");
+                }
+
+                log.debug("Got execution result : {}", executionResult);
+
+                checkExecutionResult(executionResult);
+
+                return executionResult.getResult();
+            }
+
+            @Override
+            public void onThrowable(Throwable t) {
+                log.error("Got exception while sending message {}", t);
+            }
+        };
     }
 
     private <T> void checkExecutionResult(ExecutionResult<T> executionResult) {
         if (!executionResult.isOk()) {
-            throw new TelegramBotApiException("Request not succeeded");
+            throw new TelegramBotApiException("Request not succeeded with code " + executionResult.getError_code());
         }
-    }
-
-    private Response executeRequest(Request httpRequest)
-            throws TelegramBotApiException {
-
-        log.debug("Executing request : {}", httpRequest);
-
-        Response httpResponse;
-
-        try {
-            httpResponse = httpClient.executeRequest(
-                    httpRequest,
-                    new AsyncCompletionHandler<Response>() {
-                        @Override
-                        public Response onCompleted(Response response) throws Exception {
-                            log.debug("Response : {}", response);
-                            return response;
-                        }
-                    }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new TelegramBotApiException("Error while sending request", e);
-        }
-
-        checkHttpStatuses(httpResponse);
-
-        try {
-            log.debug("Got response : {}", httpResponse.getResponseBody());
-        } catch (IOException e) {
-            log.error("Error while getting response body", e);
-        }
-
-        return httpResponse;
-    }
-
-    private void executeRequestAsync(Request httpRequest)
-            throws TelegramBotApiException {
-
-        log.debug("Executing request : {}", httpRequest);
-
-        ListenableFuture<Response> responseFuture = httpClient.executeRequest(
-                httpRequest,
-                new AsyncCompletionHandler<Response>() {
-                    @Override
-                    public Response onCompleted(Response response) throws Exception {
-                        log.debug("Response : {}", response);
-                        return response;
-                    }
-                });
     }
 
     private void checkHttpStatuses(Response httpResponse) throws TelegramBotApiException {
         if (httpResponse.getStatusCode() != HttpStatus.SC_OK) {
+
             throw new TelegramBotApiException("Error while requesting url: " + httpResponse.getUri() +
                     " response code: " + httpResponse.getStatusCode() + " reason: " + httpResponse.getStatusText());
         }

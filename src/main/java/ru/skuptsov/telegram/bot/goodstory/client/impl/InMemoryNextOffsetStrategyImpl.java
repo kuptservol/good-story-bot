@@ -13,6 +13,7 @@ import ru.skuptsov.telegram.bot.goodstory.config.NextOffSetStrategyConfiguration
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
     }
 
     @Override
-    public void saveCurrentOffset(List<Update> updates) {
+    public void saveCurrentOffset(@NotNull List<Update> updates) {
         updates.stream().map(Update::getUpdateId).max(Integer::compareTo).ifPresent(value -> counter.set(value + 1));
         if (syncMode == SyncMode.SYNC) {
             writeCurrentOffsetValue();

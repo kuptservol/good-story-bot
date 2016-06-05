@@ -34,9 +34,11 @@ public class ApiCommandSenderImpl extends AbstractExecutionThreadService impleme
     @Qualifier("commandSenderBotApi")
     private TelegramBotApi telegramBotApi;
 
-    private BlockingQueue<ApiCommand> apiCommandQueue;
+    private BlockingQueue<ApiCommand<?>> apiCommandQueue;
 
     private ExecutorService apiCommandSenderExecutor;
+
+    private ExecutorService apiCommandSenderCallbackExecutor;
 
     @Override
     public void sendCommand(ApiCommand apiCommand) {
@@ -49,16 +51,22 @@ public class ApiCommandSenderImpl extends AbstractExecutionThreadService impleme
     }
 
     @Override
-    //todo: try to generify
     protected void run() throws Exception {
         while (isRunning()) {
-            ApiCommand apiCommand = apiCommandQueue.take();
-            CompletableFuture<?> sendCommandFuture =
-                    CompletableFuture.supplyAsync(() -> apiCommand.execute(telegramBotApi), apiCommandSenderExecutor);
+            sendCommand();
+        }
+    }
 
-            if (apiCommand.getCallback() != EMPTY_CALLBACK) {
-                sendCommandFuture.thenAcceptAsync(result -> apiCommand.getCallback().accept(result));
-            }
+    //todo: try to generify
+    private void sendCommand() throws InterruptedException {
+        ApiCommand apiCommand = apiCommandQueue.take();
+        CompletableFuture<Future<?>> sendCommandFuture =
+                CompletableFuture.supplyAsync(() -> apiCommand.execute(telegramBotApi), apiCommandSenderExecutor);
+
+        if (apiCommand.getCallback() != EMPTY_CALLBACK) {
+            sendCommandFuture.thenAcceptAsync(
+                    apiCommand::callback,
+                    apiCommandSenderCallbackExecutor);
         }
     }
 
@@ -70,7 +78,14 @@ public class ApiCommandSenderImpl extends AbstractExecutionThreadService impleme
                 apiCommandSenderConfiguration.getThreadCount(),
                 new ThreadFactoryBuilder()
                         .setDaemon(true)
-                        .setNameFormat("UpdatesWorkerTask-%d")
+                        .setNameFormat("ApiCommandSenderTask-%d")
+                        .build());
+
+        apiCommandSenderCallbackExecutor = Executors.newFixedThreadPool(
+                apiCommandSenderConfiguration.getThreadCount(),
+                new ThreadFactoryBuilder()
+                        .setDaemon(true)
+                        .setNameFormat("ApiCommandSenderCallbackTask-%d")
                         .build());
     }
 
@@ -78,6 +93,10 @@ public class ApiCommandSenderImpl extends AbstractExecutionThreadService impleme
     protected void triggerShutdown() {
         shutdownAndAwaitTermination(
                 apiCommandSenderExecutor,
+                2,
+                TimeUnit.SECONDS);
+        shutdownAndAwaitTermination(
+                apiCommandSenderCallbackExecutor,
                 2,
                 TimeUnit.SECONDS);
     }
