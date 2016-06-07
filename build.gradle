@@ -65,7 +65,7 @@ dependencies {
     compile "com.ryantenney.metrics:metrics-spring:$metricsVersion"
     compile "org.aspectj:aspectjrt:$aspectjVersion"
     compile "org.aspectj:aspectjweaver:$aspectjVersion"
-    compile 'com.github.rubenlagus:TelegramBots:v2.3.2'
+    compile 'com.github.rubenlagus:TelegramBots:v2.3.3.2'
     compile "com.ning:async-http-client:$ningVersion"
 }
 
