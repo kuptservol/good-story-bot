@@ -1,6 +1,8 @@
 package ru.skuptsov.telegram.bot.platform.client;
 
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 
@@ -16,4 +18,8 @@ public interface TelegramBotApi {
     List<Update> getNextUpdates(Integer poolingLimit, Integer poolingTimeout);
 
     Future<Message> sendMessage(SendMessage sendMessage);
+
+    Future<Message> editMessageReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup);
+
+    Future<Message> editMessageText(EditMessageText editMessageText);
 }

@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import ru.skuptsov.telegram.bot.platform.client.NextOffsetStrategy;
@@ -66,4 +68,21 @@ public class TelegramBotApiImpl implements TelegramBotApi {
                 sendMessage,
                 simpleTypeOf(Message.class));
     }
+
+    @Override
+    public Future<Message> editMessageReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) {
+        return client.executePost(
+                editMessageReplyMarkup.getPath(),
+                editMessageReplyMarkup,
+                simpleTypeOf(Message.class));
+    }
+
+    @Override
+    public Future<Message> editMessageText(EditMessageText editMessageText) {
+        return client.executePost(
+                editMessageText.getPath(),
+                editMessageText,
+                simpleTypeOf(Message.class));
+    }
+
 }

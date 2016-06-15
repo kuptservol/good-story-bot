@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
-import ru.skuptsov.telegram.bot.platform.processor.CommandEventProcessor;
-import ru.skuptsov.telegram.bot.platform.processor.ConditionEventProcessor;
-import ru.skuptsov.telegram.bot.platform.processor.DefaultEventProcessor;
-import ru.skuptsov.telegram.bot.platform.processor.EventProcessor;
+import ru.skuptsov.telegram.bot.platform.processor.*;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -23,11 +20,14 @@ import static org.springframework.util.StringUtils.isEmpty;
  * @since 31/05/2016
  */
 @Component
-public class EventProcessorResolver {
+public class EventProcessorResolver implements ProcessorResolver {
     private final Logger log = LoggerFactory.getLogger(EventProcessorResolver.class);
 
     @Autowired(required = false)
-    private List<CommandEventProcessor> commandEventProcessors;
+    private List<MessageTextEventProcessor> messageTextEventProcessors;
+
+    @Autowired(required = false)
+    private List<CallbackQueryDataEventProcessor> callbackQueryDataEventProcessors = new ArrayList<>();
 
     @Autowired(required = false)
     private List<ConditionEventProcessor> conditionEventProcessors = new ArrayList<>();
@@ -37,40 +37,74 @@ public class EventProcessorResolver {
 
     private ProcessorResolver processorResolver;
 
+    @Override
     public EventProcessor resolve(UpdateEvent updateEvent) {
         log.debug("Resolving processor for event {}", updateEvent);
 
         return processorResolver.resolve(updateEvent);
     }
 
+    //todo: go to new interface
+    @Override
+    public ProcessorResolver setNext(ProcessorResolver processorResolver) {
+        return null;
+    }
+
     @PostConstruct
     public void init() {
-        Map<String, EventProcessor> commandEventProcessorMap = new HashMap<>();
+        Map<Object, EventProcessor> messageTextProcessorMap = initializeMessageEventProcessor();
+        Map<Object, EventProcessor> callbackDataEventProcessorMap = initializeCallbackDataEventProcessor();
 
-        commandEventProcessors.stream().forEach(commandEventProcessor -> {
-            List<String> commandTextList = commandEventProcessor.getCommandText();
-
-            for (String commandText : commandTextList) {
-
-                if (isEmpty(commandText)) {
-                    log.error("Found empty command in {}", commandEventProcessor);
-                    throw new IllegalArgumentException("Found empty command");
-                }
-
-                if (commandEventProcessorMap.containsKey(commandText)) {
-                    log.error("Duplicate command [{}] configuration found in processor {}", commandText, commandEventProcessor);
-                    throw new IllegalArgumentException("Duplicate command configuration found in processor");
-                }
-
-                commandEventProcessorMap.put(commandText, commandEventProcessor);
-            }
-        });
-
-
-        processorResolver = new CommandEventProcessorResolver(commandEventProcessorMap);
+        processorResolver = new MessageTextProcessorResolver(messageTextProcessorMap);
+        CallbackQueryDataProcessorResolver callbackQueryDataProcessorResolver = new CallbackQueryDataProcessorResolver(callbackDataEventProcessorMap);
         ConditionEventProcessResolver conditionEventProcessResolver = new ConditionEventProcessResolver(conditionEventProcessors);
         DefaultEventProcessorResolver defaultEventProcessorResolver = new DefaultEventProcessorResolver(defaultEventProcessor);
 
-        processorResolver.setNext(conditionEventProcessResolver).setNext(defaultEventProcessorResolver);
+        processorResolver
+                .setNext(callbackQueryDataProcessorResolver)
+                .setNext(conditionEventProcessResolver)
+                .setNext(defaultEventProcessorResolver);
+    }
+
+    private Map<Object, EventProcessor> initializeMessageEventProcessor() {
+        Map<Object, EventProcessor> messageTextProcessorMap = new HashMap<>();
+
+        messageTextEventProcessors.stream().forEach(commandEventProcessor -> {
+            List<String> commandTextList = commandEventProcessor.getMessageText();
+
+            fillProcessorsMap(messageTextProcessorMap, commandEventProcessor, commandTextList);
+
+        });
+        return messageTextProcessorMap;
+    }
+
+    private Map<Object, EventProcessor> initializeCallbackDataEventProcessor() {
+        Map<Object, EventProcessor> callbackDataEventProcessorMap = new HashMap<>();
+
+        callbackQueryDataEventProcessors.stream().forEach(callbackQueryProcessor -> {
+            List<String> callbackQueryDataList = callbackQueryProcessor.getCallbackQueryData();
+
+            fillProcessorsMap(callbackDataEventProcessorMap, callbackQueryProcessor, callbackQueryDataList);
+        });
+        return callbackDataEventProcessorMap;
+    }
+
+    private void fillProcessorsMap(Map<Object, EventProcessor> eventProcessorsMap,
+                                   EventProcessor eventProcessor,
+                                   List<String> dataList) {
+        for (String data : dataList) {
+
+            if (isEmpty(data)) {
+                log.error("Found empty command in {}", eventProcessor);
+                throw new IllegalArgumentException("Found empty command");
+            }
+
+            if (eventProcessorsMap.containsKey(data)) {
+                log.error("Duplicate command [{}] configuration found in processor {}", data, eventProcessor);
+                throw new IllegalArgumentException("Duplicate command configuration found in processor");
+            }
+
+            eventProcessorsMap.put(data, eventProcessor);
+        }
     }
 }
