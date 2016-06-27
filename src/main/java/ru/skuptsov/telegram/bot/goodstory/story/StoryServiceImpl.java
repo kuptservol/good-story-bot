@@ -1,5 +1,7 @@
 package ru.skuptsov.telegram.bot.goodstory.story;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,8 +10,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StoryServiceImpl implements StoryService {
+    private final static Logger log = LoggerFactory.getLogger(StoryServiceImpl.class);
+
     @Override
     public String getStory(StoryQuery storyQuery) {
+        log.debug("Received request for story by query [{}]", storyQuery);
+
         return "Говорят, зло не имеет лица. Действительно, " +
                 "на его лице не отражалось никаких чувств. " +
                 "Ни проблеска сочувствия не было на нем, " +

@@ -1,10 +1,7 @@
 package ru.skuptsov.telegram.bot.platform.processor;
 
-import org.telegram.telegrambots.api.objects.Update;
-
 import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.function.Function;
+import java.util.Set;
 
 /**
  * @author Sergey Kuptsov
@@ -13,5 +10,5 @@ import java.util.function.Function;
 public interface MessageTextEventProcessor extends EventProcessor {
 
     @NotNull
-    List<String> getMessageText();
+    Set<String> getMessageText();
 }

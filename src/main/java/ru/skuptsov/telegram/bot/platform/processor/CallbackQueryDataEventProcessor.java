@@ -1,7 +1,7 @@
 package ru.skuptsov.telegram.bot.platform.processor;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author Sergey Kuptsov
@@ -10,5 +10,5 @@ import java.util.List;
 public interface CallbackQueryDataEventProcessor extends EventProcessor {
 
     @NotNull
-    List<String> getCallbackQueryData();
+    Set<String> getCallbackQueryData();
 }

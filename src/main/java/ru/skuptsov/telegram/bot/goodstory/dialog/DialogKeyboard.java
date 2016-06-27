@@ -16,6 +16,6 @@ import java.util.List;
 @ToString
 public class DialogKeyboard {
 
-    private String messageText;
     List<InlineKeyboardButton> keyboardButtons;
+    private String messageText;
 }

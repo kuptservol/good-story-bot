@@ -31,7 +31,7 @@ public final class NonBlockingUpdatesSaver implements UpdatesSaver {
                     boolean offered = updatesQueue.offer(updateEvent);
                     if (!offered) {
                         log.warn("UpdateEvent [{}] hasn't been saved, Queue is full", updateEvent);
-                    }else{
+                    } else {
                         log.trace("Saved update event [{}]", updateEvent);
                     }
                 });

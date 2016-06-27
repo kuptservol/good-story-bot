@@ -35,14 +35,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Component
 public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
     private final Logger log = LoggerFactory.getLogger(IdentityNamingStrategy.class);
-
-    private enum SyncMode {
-        ASYNC,
-        SYNC
-    }
-
     private final AtomicInteger counter = new AtomicInteger(0);
-
+    private final ScheduledExecutorService persistCounterService = newScheduledThreadPool(1,
+            new ThreadFactoryBuilder()
+                    .setNameFormat("PersistCounterThread-%d")
+                    .setDaemon(true)
+                    .build());
     private RandomAccessFile writer;
 
     private SyncMode syncMode;
@@ -52,12 +50,6 @@ public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
 
     @Autowired
     private ResourceLoader resourceLoader;
-
-    private final ScheduledExecutorService persistCounterService = newScheduledThreadPool(1,
-            new ThreadFactoryBuilder()
-                    .setNameFormat("PersistCounterThread-%d")
-                    .setDaemon(true)
-                    .build());
 
     @Override
     public Integer getNextOffset() {
@@ -135,5 +127,10 @@ public class InMemoryNextOffsetStrategyImpl implements NextOffsetStrategy {
         } catch (IOException e) {
             log.error("Can't write counter to file");
         }
+    }
+
+    private enum SyncMode {
+        ASYNC,
+        SYNC
     }
 }

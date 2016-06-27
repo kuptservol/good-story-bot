@@ -1,18 +1,21 @@
 package ru.skuptsov.telegram.bot.goodstory.dialog;
 
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.stream;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Sergey Kuptsov
  * @since 13/06/2016
  */
 public enum DialogState {
-
     FINISH(null, EmptyDialog.class, ""),
     RATING(FINISH, Sorting.class, "Выберите сортировку"),
     LANGUAGE(RATING, Language.class, "Выберите язык"),
@@ -20,14 +23,18 @@ public enum DialogState {
     LENGTH(GENRE, Length.class, "Выберите длительность"),
     START(LENGTH, EmptyDialog.class, "");
 
+    public static final String BACK_CALLBACK = "back";
+    private static final Map<DialogState, DialogState> previousValue =
+            stream(DialogState.values())
+                    .collect(toMap(DialogState::getNext, identity()));
     private final DialogState next;
-    private final Class<? extends DialogEnum> dialogEnumClass;
+    private final Class<? extends Dialog> dialog;
     private final String dialogText;
     private final InlineKeyboardMarkup replyKeyboard;
 
-    DialogState(DialogState next, Class<? extends DialogEnum> dialogEnumClass, String dialogText) {
+    DialogState(DialogState next, Class<? extends Dialog> dialog, String dialogText) {
         this.next = next;
-        this.dialogEnumClass = dialogEnumClass;
+        this.dialog = dialog;
         this.dialogText = dialogText;
         replyKeyboard = getInlineKeyBoardMarkup();
     }
@@ -44,8 +51,8 @@ public enum DialogState {
         return replyKeyboard;
     }
 
-    public Class<? extends DialogEnum> getDialogEnumClass() {
-        return dialogEnumClass;
+    public Class<? extends Dialog> getDialog() {
+        return dialog;
     }
 
     public InlineKeyboardMarkup getInlineKeyBoardMarkup() {
@@ -55,15 +62,19 @@ public enum DialogState {
         List<InlineKeyboardButton> internalKeyboard = new ArrayList<>();
         keyboard.add(internalKeyboard);
 
-        for (DialogEnum dialogEnum : dialogEnumClass.getEnumConstants()) {
+        for (Dialog dialog : this.dialog.getEnumConstants()) {
             InlineKeyboardButton inlineKeyboardButtonLength = new InlineKeyboardButton();
-            inlineKeyboardButtonLength.setText(dialogEnum.getText());
-            inlineKeyboardButtonLength.setCallbackData(dialogEnum.getCallbackData());
+            inlineKeyboardButtonLength.setText(dialog.getText());
+            inlineKeyboardButtonLength.setCallbackData(dialog.getCallbackData());
             internalKeyboard.add(inlineKeyboardButtonLength);
         }
 
         inlineKeyboardMarkup.setKeyboard(keyboard);
 
         return inlineKeyboardMarkup;
+    }
+
+    public DialogState getPrevious() {
+        return previousValue.get(this);
     }
 }

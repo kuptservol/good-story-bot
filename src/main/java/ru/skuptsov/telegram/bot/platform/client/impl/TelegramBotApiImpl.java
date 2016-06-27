@@ -28,11 +28,9 @@ import static ru.skuptsov.telegram.bot.platform.client.utils.JavaTypeUtils.simpl
  */
 public class TelegramBotApiImpl implements TelegramBotApi {
     private final Logger log = LoggerFactory.getLogger(TelegramBotApiImpl.class);
-
+    private final TelegramBotHttpClient client;
     @Autowired
     private NextOffsetStrategy nextOffsetStrategy;
-
-    private final TelegramBotHttpClient client;
 
     public TelegramBotApiImpl(TelegramBotHttpClient client) {
         this.client = client;

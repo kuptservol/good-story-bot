@@ -39,14 +39,13 @@ public class UpdatesRepositoryConfiguration {
 
     @Value("${telegram.client.allowPoolingConnections:true}")
     private Boolean allowPoolingConnections;
+    @Autowired
+    private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
     @Bean
     public EventBus getEventBus() {
         return new EventBus();
     }
-
-    @Autowired
-    private TelegramBotClientConfiguration telegramBotClientConfiguration;
 
     @Bean(name = "updateRepositoryBotApi")
     public TelegramBotApi telegramBotApi() {

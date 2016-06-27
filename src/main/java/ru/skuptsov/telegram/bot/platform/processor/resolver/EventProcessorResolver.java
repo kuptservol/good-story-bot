@@ -8,10 +8,7 @@ import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.processor.*;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -70,7 +67,7 @@ public class EventProcessorResolver implements ProcessorResolver {
         Map<Object, EventProcessor> messageTextProcessorMap = new HashMap<>();
 
         messageTextEventProcessors.stream().forEach(commandEventProcessor -> {
-            List<String> commandTextList = commandEventProcessor.getMessageText();
+            Set<String> commandTextList = commandEventProcessor.getMessageText();
 
             fillProcessorsMap(messageTextProcessorMap, commandEventProcessor, commandTextList);
 
@@ -82,7 +79,7 @@ public class EventProcessorResolver implements ProcessorResolver {
         Map<Object, EventProcessor> callbackDataEventProcessorMap = new HashMap<>();
 
         callbackQueryDataEventProcessors.stream().forEach(callbackQueryProcessor -> {
-            List<String> callbackQueryDataList = callbackQueryProcessor.getCallbackQueryData();
+            Set<String> callbackQueryDataList = callbackQueryProcessor.getCallbackQueryData();
 
             fillProcessorsMap(callbackDataEventProcessorMap, callbackQueryProcessor, callbackQueryDataList);
         });
@@ -91,7 +88,7 @@ public class EventProcessorResolver implements ProcessorResolver {
 
     private void fillProcessorsMap(Map<Object, EventProcessor> eventProcessorsMap,
                                    EventProcessor eventProcessor,
-                                   List<String> dataList) {
+                                   Set<String> dataList) {
         for (String data : dataList) {
 
             if (isEmpty(data)) {

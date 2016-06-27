@@ -11,9 +11,9 @@ import ru.skuptsov.telegram.bot.platform.client.command.impl.SendMessageCommand;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.processor.MessageTextEventProcessor;
 
-import java.util.List;
+import java.util.Set;
 
-import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * @author Sergey Kuptsov
@@ -52,7 +52,7 @@ public class StartReadingProcessor implements MessageTextEventProcessor {
     }
 
     @Override
-    public List<String> getMessageText() {
+    public Set<String> getMessageText() {
         return of(STARTREADING, START);
     }
 }
