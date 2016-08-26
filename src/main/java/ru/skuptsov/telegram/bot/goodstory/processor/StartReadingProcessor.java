@@ -1,38 +1,36 @@
 package ru.skuptsov.telegram.bot.goodstory.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import ru.skuptsov.telegram.bot.goodstory.dialog.DialogState;
-import ru.skuptsov.telegram.bot.goodstory.dialog.UserDialog;
-import ru.skuptsov.telegram.bot.goodstory.dialog.UserDialogStore;
-import ru.skuptsov.telegram.bot.platform.client.command.ApiCommand;
-import ru.skuptsov.telegram.bot.platform.client.command.impl.SendMessageCommand;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
+import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageHandler;
+import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageMapping;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
-import ru.skuptsov.telegram.bot.platform.processor.MessageTextEventProcessor;
 
-import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.of;
+import static ru.skuptsov.telegram.bot.platform.client.command.MessageResponse.sendMessage;
 
 /**
  * @author Sergey Kuptsov
  * @since 06/06/2016
  */
-@Component
-public class StartReadingProcessor implements MessageTextEventProcessor {
+@MessageHandler
+public class StartReadingProcessor {
     private static final String STARTREADING = "/startreading";
     private static final String START = "/start";
 
     @Autowired
     private UserDialogStore userDialogStore;
 
-    @Override
-    public ApiCommand process(UpdateEvent updateEvent) {
+    @MessageMapping(text = {STARTREADING, START})
+    public MessageResponse process(UpdateEvent updateEvent) {
         SendMessage sendMessage = new SendMessage();
 
         Long chatId = updateEvent.getUpdate().getMessage().getChatId();
-        sendMessage.setChatId(updateEvent.getUpdate().getMessage().getChatId().toString());
+
+        sendMessage.setChatId(chatId.toString());
 
         UserDialog userDialog = userDialogStore.startUserDialog(chatId);
 
@@ -46,13 +44,6 @@ public class StartReadingProcessor implements MessageTextEventProcessor {
 
         sendMessage.setReplayMarkup(dialogState.getReplyKeyboard());
 
-        return SendMessageCommand.builder()
-                .sendMessage(sendMessage)
-                .build();
-    }
-
-    @Override
-    public Set<String> getMessageText() {
-        return of(STARTREADING, START);
+        return sendMessage(sendMessage);
     }
 }

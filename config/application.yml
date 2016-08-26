@@ -1,3 +1,13 @@
 
 telegram.client:
-  token: 235210234:AAGCi_Ubmn90dTAEHlQBfYRlTgJy1MVZDUs
+  token: {token}
+
+spring.datasource:
+  url: jdbc:postgresql://localhost/good_story
+  username: good_story
+  password: good_story
+  testOnBorrow: true
+  validationQuery: SELECT 1
+  initialSize : 1
+  maxIdle : 1
+  maxActive : 5

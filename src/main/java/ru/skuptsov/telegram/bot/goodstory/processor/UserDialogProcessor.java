@@ -3,36 +3,39 @@ package ru.skuptsov.telegram.bot.goodstory.processor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
-import ru.skuptsov.telegram.bot.goodstory.dialog.Dialog;
-import ru.skuptsov.telegram.bot.goodstory.dialog.DialogState;
-import ru.skuptsov.telegram.bot.goodstory.dialog.UserDialog;
-import ru.skuptsov.telegram.bot.goodstory.dialog.UserDialogStore;
-import ru.skuptsov.telegram.bot.goodstory.story.StoryService;
-import ru.skuptsov.telegram.bot.platform.client.command.ApiCommand;
-import ru.skuptsov.telegram.bot.platform.client.command.impl.EditMessageTextCommand;
+import ru.skuptsov.telegram.bot.goodstory.model.Story;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.Dialog;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
+import ru.skuptsov.telegram.bot.goodstory.service.story.StoryService;
+import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.handler.CallbackQueryDataMessageHandler;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
-import ru.skuptsov.telegram.bot.platform.processor.CallbackQueryDataEventProcessor;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toSet;
-import static ru.skuptsov.telegram.bot.goodstory.dialog.DialogState.BACK_CALLBACK;
+import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.BACK_CALLBACK;
 
 /**
  * @author Sergey Kuptsov
  * @since 07/06/2016
  */
 @Component
-public class UserDialogProcessor implements CallbackQueryDataEventProcessor {
+public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
 
     private final Set<String> dialogCallbacks =
             stream(DialogState.values())
                     .flatMap(dialogState -> stream(dialogState.getDialog().getEnumConstants()))
                     .map(Dialog::getCallbackData)
-                    .collect(toSet());
+                    .collect(Collectors.toSet());
+
+
     @Autowired
     private UserDialogStore userDialogStore;
+
     @Autowired
     private StoryService storyService;
 
@@ -41,11 +44,10 @@ public class UserDialogProcessor implements CallbackQueryDataEventProcessor {
         return dialogCallbacks;
     }
 
-    @Override
-    public ApiCommand process(UpdateEvent updateEvent) {
+    public MessageResponse handle(UpdateEvent updateEvent) {
         Long chatId = updateEvent.getUpdate().getCallbackQuery().getMessage().getChatId();
 
-        EditMessageText sendMessage = createMessage(updateEvent, chatId);
+        EditMessageText editMessageText = createMessage(updateEvent, chatId);
 
         UserDialog userDialog = userDialogStore.getUserDialog(chatId);
 
@@ -63,19 +65,21 @@ public class UserDialogProcessor implements CallbackQueryDataEventProcessor {
         }
 
         if (dialogState != DialogState.FINISH) {
-            sendMessage.setText(dialogState.getDialogText());
-            sendMessage.setReplyMarkup(dialogState.getReplyKeyboard());
+            editMessageText.setText(dialogState.getDialogText());
+            editMessageText.setReplyMarkup(dialogState.getReplyKeyboard());
             userDialog.setDialogState(dialogState);
 
             userDialogStore.updateUserDialog(chatId, userDialog);
         } else {
-            sendMessage.setText(storyService.getStory(userDialog.getStoryQuery()));
+            editMessageText.setText(storyService.getStory(
+                    userDialog.getStoryQuery(),
+                    updateEvent.getUpdate().getCallbackQuery().getMessage().getFrom().getId())
+                    .map(Story::getText)
+                    .orElse("Новых текство не найдено"));
             userDialogStore.finishUserDialog(chatId);
         }
 
-        return EditMessageTextCommand.builder()
-                .editMessageText(sendMessage)
-                .build();
+        return MessageResponse.editMessageText(editMessageText);
     }
 
     private EditMessageText createMessage(UpdateEvent updateEvent, Long chatId) {
@@ -85,4 +89,5 @@ public class UserDialogProcessor implements CallbackQueryDataEventProcessor {
         sendMessage.setMessageId(updateEvent.getUpdate().getCallbackQuery().getMessage().getMessageId());
         return sendMessage;
     }
+
 }
