@@ -14,4 +14,6 @@ public interface StoryRepository {
     Story getStoryUnseen(@NotNull StoryQuery storyQuery, int userId);
 
     void markStoryAsSeen(long storyId, int userId);
+
+    Story selectById();
 }

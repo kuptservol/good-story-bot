@@ -1,0 +1,22 @@
+
+telegram.client:
+  token: test
+
+spring.datasource:
+  url: jdbc:postgresql://localhost/good_story
+  username: good_story
+  password: good_story
+  testOnBorrow: true
+  validationQuery: SELECT 1
+  initialSize : 1
+  maxIdle : 1
+  maxActive : 5
+
+spring.jpa:
+  show-sql: true
+  hibernate:
+    ddl-auto: update
+    naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect

@@ -5,3 +5,4 @@ build/
 *.iml
 logs
 gradlew.bat
+application.yml

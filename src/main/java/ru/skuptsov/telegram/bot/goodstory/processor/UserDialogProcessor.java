@@ -2,7 +2,6 @@ package ru.skuptsov.telegram.bot.goodstory.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import ru.skuptsov.telegram.bot.goodstory.model.Story;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.Dialog;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
@@ -12,6 +11,7 @@ import ru.skuptsov.telegram.bot.goodstory.service.story.StoryService;
 import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
 import ru.skuptsov.telegram.bot.platform.handler.CallbackQueryDataMessageHandler;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.model.updatingmessages.EditMessageText;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,7 +75,7 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
                     userDialog.getStoryQuery(),
                     updateEvent.getUpdate().getCallbackQuery().getMessage().getFrom().getId())
                     .map(Story::getText)
-                    .orElse("Новых текство не найдено"));
+                    .orElse("Новых текстов не найдено"));
             userDialogStore.finishUserDialog(chatId);
         }
 

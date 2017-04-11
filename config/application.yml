@@ -1,6 +1,6 @@
 
 telegram.client:
-  token: {token}
+  token: 235210234:AAGCi_Ubmn90dTAEHlQBfYRlTgJy1MVZDUs
 
 spring.datasource:
   url: jdbc:postgresql://localhost/good_story
@@ -11,3 +11,12 @@ spring.datasource:
   initialSize : 1
   maxIdle : 1
   maxActive : 5
+
+spring.jpa:
+  show-sql: true
+  hibernate:
+    ddl-auto: update
+    naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect

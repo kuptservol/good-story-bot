@@ -42,7 +42,7 @@ public class StartReadingProcessor {
 
         sendMessage.setText(dialogState.getDialogText());
 
-        sendMessage.setReplayMarkup(dialogState.getReplyKeyboard());
+        sendMessage.setReplyMarkup(dialogState.getReplyKeyboard());
 
         return sendMessage(sendMessage);
     }
