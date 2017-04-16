@@ -26,7 +26,7 @@ public class UserDialogStoreImpl implements UserDialogStore {
     public UserDialog startUserDialog(Long chatId) {
         UserDialog dialog = UserDialog.builder()
                 .dialogState(DialogState.START)
-                .storyQuery(new StoryQuery())
+                .storyQuery(StoryQuery.builder().build())
                 .build();
         userDialogCache.put(chatId,
                 dialog);
@@ -40,7 +40,7 @@ public class UserDialogStoreImpl implements UserDialogStore {
         if (userDialog == null) {
             UserDialog dialog = UserDialog.builder()
                     .dialogState(DialogState.START)
-                    .storyQuery(new StoryQuery())
+                    .storyQuery(StoryQuery.builder().build())
                     .build();
             userDialogCache.put(chatId, dialog);
             return dialog;

@@ -17,17 +17,19 @@ import static java.util.stream.Collectors.toMap;
  */
 public enum DialogState {
     FINISH(null, EmptyDialog.class, ""),
-    RATING(FINISH, Sorting.class, "Выберите сортировку"),
-    LANGUAGE(RATING, Language.class, "Выберите язык"),
-    GENRE(LANGUAGE, Genre.class, "Выберите жанр"),
-    LENGTH(GENRE, Length.class, "Выберите длительность"),
-    TYPE(LENGTH, Type.class, "Выберите тип"),
+    //    RATING(FINISH, Sorting.class, "Выберите сортировку"),
+//    LANGUAGE(FINISH, Language.class, "Язык"),
+    GENRE(FINISH, Genre.class, "Жанр"),
+    LENGTH(GENRE, Length.class, "Длительность"),
+    TYPE(LENGTH, Type.class, "Тип"),
     START(TYPE, EmptyDialog.class, "");
 
     public static final String BACK_CALLBACK = "back";
+
     private static final Map<DialogState, DialogState> previousValue =
             stream(DialogState.values())
                     .collect(toMap(DialogState::getNext, identity()));
+
     private final DialogState next;
     private final Class<? extends Dialog> dialog;
     private final String dialogText;
@@ -61,13 +63,19 @@ public enum DialogState {
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> internalKeyboard = new ArrayList<>();
+        int currKeyBoardLineIndex = 1;
         keyboard.add(internalKeyboard);
 
         for (Dialog dialog : this.dialog.getEnumConstants()) {
-            InlineKeyboardButton inlineKeyboardButtonLength = new InlineKeyboardButton();
-            inlineKeyboardButtonLength.setText(dialog.getText());
-            inlineKeyboardButtonLength.setCallbackData(dialog.getCallbackData());
-            internalKeyboard.add(inlineKeyboardButtonLength);
+            if (dialog.getKeyboardLine() != currKeyBoardLineIndex) {
+                internalKeyboard = new ArrayList<>();
+                currKeyBoardLineIndex++;
+                keyboard.add(internalKeyboard);
+            }
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(dialog.getText());
+            button.setCallbackData(dialog.getCallbackData());
+            internalKeyboard.add(button);
         }
 
         inlineKeyboardMarkup.setKeyboard(keyboard);

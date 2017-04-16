@@ -12,6 +12,10 @@ public interface Dialog {
 
     String getText();
 
+    default int getKeyboardLine() {
+        return 1;
+    }
+
     String getCallbackData();
 
     void updateStoryQuery(@NotNull StoryQuery storyQuery, @NotNull String callbackData);

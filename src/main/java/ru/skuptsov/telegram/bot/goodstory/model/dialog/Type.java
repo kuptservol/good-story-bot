@@ -9,7 +9,6 @@ import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.BACK_CALLBACK;
 
 /**
  * @author Sergey Kuptsov
@@ -17,8 +16,7 @@ import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.BACK_C
  */
 public enum Type implements Dialog {
     STORY("рассказ", "type.story"),
-    PART("отрывок", "type.part"),
-    BACK("назад", BACK_CALLBACK);
+    PART("отрывок", "type.part");
 
     private static final Map<String, Type> valuesMap =
             stream(Type.values())

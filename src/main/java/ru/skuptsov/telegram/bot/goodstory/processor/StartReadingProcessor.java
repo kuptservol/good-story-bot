@@ -18,13 +18,14 @@ import static ru.skuptsov.telegram.bot.platform.client.command.MessageResponse.s
  */
 @MessageHandler
 public class StartReadingProcessor {
-    private static final String STARTREADING = "/startreading";
+    private static final String STARTREADING = "/read";
+    private static final String STARTREADING_OLD = "/startreading";
     private static final String START = "/start";
 
     @Autowired
     private UserDialogStore userDialogStore;
 
-    @MessageMapping(text = {STARTREADING, START})
+    @MessageMapping(text = {STARTREADING, START, STARTREADING_OLD})
     public MessageResponse process(UpdateEvent updateEvent) {
         SendMessage sendMessage = new SendMessage();
 
@@ -41,8 +42,7 @@ public class StartReadingProcessor {
         userDialogStore.updateUserDialog(chatId, userDialog);
 
         sendMessage.setText(dialogState.getDialogText());
-
-        sendMessage.setReplayMarkup(dialogState.getReplyKeyboard());
+        sendMessage.setReplyMarkup(dialogState.getReplyKeyboard());
 
         return sendMessage(sendMessage);
     }

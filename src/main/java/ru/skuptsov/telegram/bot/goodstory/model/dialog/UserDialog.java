@@ -15,7 +15,6 @@ import ru.skuptsov.telegram.bot.goodstory.model.query.StoryQuery;
 @Getter
 @Setter
 public class UserDialog {
-
     private DialogState dialogState;
     private StoryQuery storyQuery;
 }

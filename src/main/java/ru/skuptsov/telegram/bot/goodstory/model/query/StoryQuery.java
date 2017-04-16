@@ -1,8 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.model.query;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.*;
 
 /**
@@ -12,11 +10,14 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.*;
 @ToString
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class StoryQuery {
-
     private Type type;
-    private Genre genre;
     private Length length;
+    private Genre genre;
+    // Disabled
     private Sorting sorting;
+    // Disabled
     private Language language;
 }

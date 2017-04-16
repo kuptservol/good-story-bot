@@ -1,5 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.repository;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.skuptsov.telegram.bot.goodstory.model.Story;
 import ru.skuptsov.telegram.bot.goodstory.model.query.StoryQuery;
 
@@ -14,4 +15,7 @@ public interface StoryRepository {
     Story getStoryUnseen(@NotNull StoryQuery storyQuery, int userId);
 
     void markStoryAsSeen(long storyId, int userId);
+
+    @Transactional
+    void add(Story story);
 }

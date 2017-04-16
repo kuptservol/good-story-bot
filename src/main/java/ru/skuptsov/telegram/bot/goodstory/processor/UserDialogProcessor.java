@@ -2,22 +2,25 @@ package ru.skuptsov.telegram.bot.goodstory.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import ru.skuptsov.telegram.bot.goodstory.model.Story;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.Dialog;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.processor.story.StoryTextBuilder;
 import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 import ru.skuptsov.telegram.bot.goodstory.service.story.StoryService;
 import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
 import ru.skuptsov.telegram.bot.platform.handler.CallbackQueryDataMessageHandler;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
+import ru.skuptsov.telegram.bot.platform.model.updatingmessages.EditMessageText;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.BACK_CALLBACK;
+import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.START;
 
 /**
  * @author Sergey Kuptsov
@@ -35,6 +38,9 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
 
     @Autowired
     private UserDialogStore userDialogStore;
+
+    @Autowired
+    private StoryTextBuilder storyTextBuilder;
 
     @Autowired
     private StoryService storyService;
@@ -55,11 +61,13 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
         String callbackData = updateEvent.getUpdate().getCallbackQuery().getData();
 
         DialogState dialogState;
-        if (callbackData.equals(BACK_CALLBACK)) {
+        if (callbackData.equals(BACK_CALLBACK) && currentDialogState != START) {
             dialogState = currentDialogState.getPrevious();
         } else {
-            currentDialogState.getDialog().getEnumConstants()[0]
-                    .updateStoryQuery(userDialog.getStoryQuery(), callbackData);
+            if (currentDialogState != START) {
+                currentDialogState.getDialog().getEnumConstants()[0]
+                        .updateStoryQuery(userDialog.getStoryQuery(), callbackData);
+            }
 
             dialogState = currentDialogState.getNext();
         }
@@ -71,15 +79,21 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
 
             userDialogStore.updateUserDialog(chatId, userDialog);
         } else {
-            editMessageText.setText(storyService.getStory(
-                    userDialog.getStoryQuery(),
-                    updateEvent.getUpdate().getCallbackQuery().getMessage().getFrom().getId())
-                    .map(Story::getText)
-                    .orElse("Новых текство не найдено"));
+            editMessageText.setText(storyTextBuilder.build(getStory(updateEvent, userDialog)));
             userDialogStore.finishUserDialog(chatId);
         }
 
         return MessageResponse.editMessageText(editMessageText);
+    }
+
+    private Optional<Story> getStory(UpdateEvent updateEvent, UserDialog userDialog) {
+        return storyService.getStory(
+                userDialog.getStoryQuery(),
+                getUserId(updateEvent));
+    }
+
+    private Integer getUserId(UpdateEvent updateEvent) {
+        return updateEvent.getUpdate().getCallbackQuery().getMessage().getFrom().getId();
     }
 
     private EditMessageText createMessage(UpdateEvent updateEvent, Long chatId) {
