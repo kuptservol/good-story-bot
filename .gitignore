@@ -6,3 +6,5 @@ logs
 gradlew.bat
 application.yml
 *.txt
+logs
+*.log

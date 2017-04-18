@@ -15,6 +15,27 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="DEBUG">
-    </root>
+    <appender name="DEBUG-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <file>logs/good_story_bot.debug.log</file>
+        <encoder>
+            <pattern>%d %p [%t] %C{1} - reqId:%X{reqId} - %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>20</maxIndex>
+            <FileNamePattern>logs/good_story_bot.log.debug.log.%i</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>64MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <logger name="ru.skuptsov.telegram.bot" level="DEBUG">
+        <appender-ref ref="DEBUG-FILE"/>
+    </logger>
+
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="DEBUG-FILE"/>
+    </logger>
+
 </configuration>
