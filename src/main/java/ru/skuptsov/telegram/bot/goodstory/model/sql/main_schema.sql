@@ -1,3 +1,9 @@
+CREATE DATABASE good_story;
+
+CREATE USER good_story WITH password 'good_story';
+
+GRANT ALL privileges ON DATABASE good_story TO good_story;
+
 CREATE TABLE story
 (
   id       BIGINT            NOT NULL
