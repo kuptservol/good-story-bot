@@ -51,7 +51,7 @@ public class StoryServiceImpl implements StoryService {
         }
 
         Story story = storyRepository.getStoryUnseen(storyQuery, userId);
-        if (storyQuery.getType() == PART) {
+        if (story != null && storyQuery.getType() == PART) {
             story.setText(cutStoryPartToLength(story.getText(), length));
         }
 

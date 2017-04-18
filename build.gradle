@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'spring-boot'
+apply plugin: 'application'
 
 buildscript {
     ext {
@@ -43,6 +44,18 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.0.1.Final'
 
+}
+
+mainClassName = "ru.skuptsov.telegram.bot.goodstory.GoodStoryBotRunner"
+
+jar {
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 sourceCompatibility = 1.8
