@@ -17,10 +17,13 @@ import static java.util.stream.Collectors.toMap;
  */
 public enum DialogState {
     FINISH(null, EmptyDialog.class, ""),
+    // Disabled
     //    RATING(FINISH, Sorting.class, "Выберите сортировку"),
+    // Disabled
 //    LANGUAGE(FINISH, Language.class, "Язык"),
-    GENRE(FINISH, Genre.class, "Жанр"),
-    LENGTH(GENRE, Length.class, "Длительность"),
+    // Disabled
+//    GENRE(FINISH, Genre.class, "Жанр"),
+    LENGTH(FINISH, Length.class, "Длительность"),
     TYPE(LENGTH, Type.class, "Тип"),
     START(TYPE, EmptyDialog.class, "");
 

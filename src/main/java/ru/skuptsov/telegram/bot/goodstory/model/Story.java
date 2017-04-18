@@ -8,7 +8,6 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.Length;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.Type;
 
 import javax.persistence.*;
-import java.sql.Date;
 
 /**
  * @author Sergey Kuptsov
@@ -43,11 +42,13 @@ public class Story {
 
     private String name;
 
-    private Date created;
+    private int year;
 
     private String author;
 
     private Integer rating;
+
+    private Integer part;
 
     private String link;
 
@@ -56,7 +57,7 @@ public class Story {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("text", "{text}")
-                .add("created", created)
+                .add("year", year)
                 .add("author", author)
                 .add("rating", rating)
                 .add("genre", genre)
@@ -64,6 +65,7 @@ public class Story {
                 .add("type", type)
                 .add("language", language)
                 .add("link", link)
+                .add("part", part)
                 .toString();
     }
 }

@@ -15,6 +15,7 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.*;
 public class StoryQuery {
     private Type type;
     private Length length;
+    // Disabled
     private Genre genre;
     // Disabled
     private Sorting sorting;

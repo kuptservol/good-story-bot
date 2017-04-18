@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import ru.skuptsov.telegram.bot.goodstory.model.Story;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.Type;
 
-import java.sql.Date;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static ru.skuptsov.telegram.bot.goodstory.model.dialog.Type.PART;
 
 @Service
 public class StoryTextBuilder {
@@ -26,14 +26,22 @@ public class StoryTextBuilder {
                     .append(getLineSeparator());
         }
 
+        if (story.getType() == PART) {
+            builder.append("...");
+        }
+
         builder
-                .append(getLineSeparator())
-                .append(story.getText())
-                .append(getLineSeparator())
+                .append(story.getText());
+
+        if (story.getType() == PART) {
+            builder.append("...");
+        }
+
+        builder.append(getLineSeparator())
                 .append(getAuthor(story))
                 .append(" ");
 
-        if (story.getType() == Type.PART) {
+        if (story.getType() == PART) {
             builder
                     .append(getName(story))
                     .append(" ");
@@ -50,13 +58,11 @@ public class StoryTextBuilder {
     }
 
     private String getName(Story story) {
-        return story.getName();
+        return "\"" + story.getName() + "\"";
     }
 
     private String getYear(Story story) {
-        return ofNullable(story.getCreated())
-                .map(Date::getYear)
-                .map(String::valueOf)
+        return ofNullable(story.getYear())
                 .map(year -> year + "г.")
                 .orElse("");
     }
