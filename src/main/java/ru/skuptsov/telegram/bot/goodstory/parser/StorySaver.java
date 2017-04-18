@@ -1,5 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.parser;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,9 @@ public class StorySaver {
     }
 
     private String normalizeText(String text) {
-        return text.replaceAll("<br>", "\n").replaceAll("\\<[^>]*>", "");
+        return StringEscapeUtils.unescapeHtml4(
+                text.replaceAll("<br>", "\n")
+                        .replaceAll("\\<[^>]*>", ""));
     }
 
     private void persist(Story story) {
