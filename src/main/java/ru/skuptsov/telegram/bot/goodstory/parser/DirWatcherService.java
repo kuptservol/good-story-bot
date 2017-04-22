@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,16 +36,14 @@ public class DirWatcherService {
         @Override
         public void run() {
             while (isRunning) {
-
-                try {
-                    Files.newDirectoryStream(BOOKS_DIR, path -> path.toFile().isFile())
-                            .forEach((fileConsumer));
+                try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(BOOKS_DIR, path -> path.toFile().isFile())) {
+                    directoryStream.forEach((fileConsumer));
                 } catch (IOException e) {
-                    log.error("Exception while deleting file", e);
+                    log.error("Exception while streaming directory", e);
                 }
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

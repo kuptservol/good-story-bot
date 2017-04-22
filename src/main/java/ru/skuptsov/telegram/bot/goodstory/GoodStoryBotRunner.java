@@ -1,7 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory;
 
 import ru.skuptsov.telegram.bot.goodstory.config.GoodStoryBotConfiguration;
-import ru.skuptsov.telegram.bot.platform.config.BotPlatformConfiguration;
 
 import static ru.skuptsov.telegram.bot.platform.config.BotPlatformStarter.start;
 
