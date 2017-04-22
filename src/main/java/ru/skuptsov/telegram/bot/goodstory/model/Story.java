@@ -42,7 +42,7 @@ public class Story {
 
     private String name;
 
-    private int year;
+    private Integer year;
 
     private String author;
 

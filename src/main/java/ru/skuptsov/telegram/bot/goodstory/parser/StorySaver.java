@@ -1,6 +1,7 @@
 package ru.skuptsov.telegram.bot.goodstory.parser;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
+import static java.util.Optional.ofNullable;
 import static ru.skuptsov.telegram.bot.goodstory.model.dialog.Type.PART;
 
 @Service
@@ -52,7 +55,7 @@ public class StorySaver {
         log.debug("Finished processing file {}", path);
     }
 
-    private void save(BufferedReader fileReader, String name, String author, String year) throws IOException {
+    public void save(BufferedReader fileReader, String name, String author, String year) throws IOException {
         log.debug("Saving new book {}, {}, {} started", author, name, year);
 
         int wordCount = 0;
@@ -114,7 +117,10 @@ public class StorySaver {
                 .length(textLength)
                 .genre(Genre.ANY)
                 .part(part)
-                .year(Integer.valueOf(year.trim()))
+                .year(ofNullable(year)
+                        .filter(v -> !StringUtils.isEmpty(v))
+                        .map(v -> Integer.valueOf(v.trim()))
+                        .orElse(null))
                 .build());
     }
 

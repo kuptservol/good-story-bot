@@ -1,6 +1,6 @@
 
 telegram.client:
-  token: 235210234:AAGCi_Ubmn90dTAEHlQBfYRlTgJy1MVZDUs
+  token: 333406361:AAHZsOAh448qjGDIX7I3llW1C3lNVTNf7Tw
 
 spring.datasource:
   url: jdbc:postgresql://localhost/good_story
@@ -11,3 +11,6 @@ spring.datasource:
   initialSize : 1
   maxIdle : 1
   maxActive : 5
+
+server:
+  port: 9090
