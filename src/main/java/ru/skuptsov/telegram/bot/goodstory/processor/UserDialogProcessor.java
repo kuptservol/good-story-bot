@@ -9,7 +9,7 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
 import ru.skuptsov.telegram.bot.goodstory.processor.story.StoryTextBuilder;
 import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 import ru.skuptsov.telegram.bot.goodstory.service.story.StoryService;
-import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.CallbackQueryDataMessageHandler;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 import ru.skuptsov.telegram.bot.platform.model.updatingmessages.EditMessageText;
@@ -50,7 +50,7 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
         return dialogCallbacks;
     }
 
-    public MessageResponse handle(UpdateEvent updateEvent) {
+    public Reply handle(UpdateEvent updateEvent) {
         Long chatId = updateEvent.getUpdate().getCallbackQuery().getMessage().getChatId();
 
         EditMessageText editMessageText = createMessage(updateEvent, chatId);
@@ -83,7 +83,7 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
             userDialogStore.finishUserDialog(chatId);
         }
 
-        return MessageResponse.editMessageText(editMessageText);
+        return Reply.withEditMessageText(editMessageText);
     }
 
     private Optional<Story> getStory(UpdateEvent updateEvent, UserDialog userDialog) {

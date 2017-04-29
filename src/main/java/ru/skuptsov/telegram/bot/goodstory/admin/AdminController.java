@@ -7,7 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import ru.skuptsov.telegram.bot.goodstory.parser.StorySaver;
+import ru.skuptsov.telegram.bot.platform.client.TelegramBotApi;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +25,9 @@ public class AdminController {
 
     @Autowired
     private StorySaver storySaver;
+
+    @Autowired
+    private TelegramBotApi telegramBotApi;
 
     @RequestMapping(value = "/book", method = GET)
     public String book(Model model) throws IOException {
@@ -45,5 +50,13 @@ public class AdminController {
         }
 
         return "result";
+    }
+
+    @RequestMapping(value = "/message", method = POST)
+    public void sendTestMessage() {
+        SendMessage message = new SendMessage();
+        message.setChatId("127255693");
+        message.setText("yohhu!");
+        telegramBotApi.sendMessage(message).async();
     }
 }

@@ -5,12 +5,10 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
 import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
-import ru.skuptsov.telegram.bot.platform.client.command.MessageResponse;
+import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageHandler;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageMapping;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
-
-import static ru.skuptsov.telegram.bot.platform.client.command.MessageResponse.sendMessage;
 
 /**
  * @author Sergey Kuptsov
@@ -26,7 +24,7 @@ public class StartReadingProcessor {
     private UserDialogStore userDialogStore;
 
     @MessageMapping(text = {STARTREADING, START, STARTREADING_OLD})
-    public MessageResponse process(UpdateEvent updateEvent) {
+    public Reply process(UpdateEvent updateEvent) {
         SendMessage sendMessage = new SendMessage();
 
         Long chatId = updateEvent.getUpdate().getMessage().getChatId();
@@ -44,6 +42,6 @@ public class StartReadingProcessor {
         sendMessage.setText(dialogState.getDialogText());
         sendMessage.setReplyMarkup(dialogState.getReplyKeyboard());
 
-        return sendMessage(sendMessage);
+        return Reply.withMessage(sendMessage);
     }
 }
