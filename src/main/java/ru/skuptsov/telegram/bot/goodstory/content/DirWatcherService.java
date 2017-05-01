@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.parser;
+package ru.skuptsov.telegram.bot.goodstory.content;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

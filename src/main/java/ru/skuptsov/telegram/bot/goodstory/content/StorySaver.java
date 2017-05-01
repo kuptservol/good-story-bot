@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.parser;
+package ru.skuptsov.telegram.bot.goodstory.content;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,9 +15,11 @@ import ru.skuptsov.telegram.bot.goodstory.repository.StoryRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
 import static java.util.Optional.ofNullable;
@@ -51,6 +53,15 @@ public class StorySaver {
         }
 
         log.debug("Finished processing file {}", path);
+    }
+
+
+    public void save(Story story) throws IOException {
+        save(new BufferedReader(
+                        new StringReader(story.getText())),
+                story.getName(),
+                story.getAuthor(),
+                Optional.ofNullable(story.getYear()).map(String::valueOf).orElse(null));
     }
 
     public void save(BufferedReader fileReader, String name, String author, String year) throws IOException {

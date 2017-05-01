@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.admin;
+package ru.skuptsov.telegram.bot.goodstory.content.admin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import ru.skuptsov.telegram.bot.goodstory.parser.StorySaver;
+import ru.skuptsov.telegram.bot.goodstory.content.StorySaver;
+import ru.skuptsov.telegram.bot.goodstory.content.parser.OstrovokParser;
 import ru.skuptsov.telegram.bot.platform.client.TelegramBotApi;
 
 import java.io.BufferedReader;
@@ -29,11 +31,26 @@ public class AdminController {
     @Autowired
     private TelegramBotApi telegramBotApi;
 
+    @Autowired
+    private OstrovokParser ostrovokParser;
+
     @RequestMapping(value = "/book", method = GET)
     public String book(Model model) throws IOException {
         model.addAttribute("createBookRequest", new CreateBookRequest());
 
         return "addBookForm";
+    }
+
+    @RequestMapping(value = "/parse/{parserName}", method = POST)
+    public void parse(
+            @PathVariable("parserName") String parserName) {
+        if (parserName.equals("ostrovok")) {
+            new Thread(
+                    () -> ostrovokParser.parse("http://ostrovok.de/c/classic/page/"),
+                    "ostrovokParserThread").start();
+        } else {
+            throw new RuntimeException("Unknow parser");
+        }
     }
 
     @RequestMapping(value = "/book", method = POST)

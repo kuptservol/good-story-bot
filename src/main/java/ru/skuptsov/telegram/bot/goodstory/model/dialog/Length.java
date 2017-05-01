@@ -9,9 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Map;
 
-import static com.google.common.collect.Range.closed;
-import static com.google.common.collect.Range.closedOpen;
-import static com.google.common.collect.Range.open;
+import static com.google.common.collect.Range.*;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;

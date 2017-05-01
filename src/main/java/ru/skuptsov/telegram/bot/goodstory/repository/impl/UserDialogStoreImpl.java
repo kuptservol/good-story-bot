@@ -3,10 +3,10 @@ package ru.skuptsov.telegram.bot.goodstory.repository.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.springframework.stereotype.Repository;
-import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
 import ru.skuptsov.telegram.bot.goodstory.model.query.StoryQuery;
+import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 
 import java.util.concurrent.TimeUnit;
 

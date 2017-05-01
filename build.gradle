@@ -14,7 +14,7 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "http://repo.spring.io/release" }
-        maven { url "http://repo.spring.io/milestone" }
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -42,7 +42,9 @@ dependencies {
     testCompile "org.kubek2k:springockito-annotations:1.0.9"
 
 
-    compile 'com.github.kuptservol:spring-telegram-bot-starter:1.4'
+    compile 'com.github.kuptservol:spring-telegram-bot-starter:1.5'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.10.2'
+    compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'org.springframework.boot:spring-boot-starter-jdbc'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-thymeleaf'

@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.admin;
+package ru.skuptsov.telegram.bot.goodstory.content.admin;
 
 import lombok.Getter;
 import lombok.Setter;

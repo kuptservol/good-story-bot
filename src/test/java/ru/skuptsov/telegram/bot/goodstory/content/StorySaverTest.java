@@ -1,4 +1,4 @@
-package ru.skuptsov.telegram.bot.goodstory.parser;
+package ru.skuptsov.telegram.bot.goodstory.content;
 
 
 import org.kubek2k.springockito.annotations.SpringockitoAnnotatedContextLoader;
