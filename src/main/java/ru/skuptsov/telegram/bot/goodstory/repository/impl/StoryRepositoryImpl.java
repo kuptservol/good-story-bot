@@ -25,12 +25,12 @@ public class StoryRepositoryImpl implements StoryRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Story getStoryUnseen(@NotNull StoryQuery storyQuery, int userId) {
+    public Story getStoryUnseen(@NotNull StoryQuery storyQuery, long chatId) {
         Query query = sessionFactory.getCurrentSession()
                 .createSQLQuery("" +
                         "SELECT * FROM story s " +
                         "WHERE NOT EXISTS " +
-                        "(SELECT user_id FROM story_seen ss WHERE user_id = :userId AND ss.story_id = s.id) " +
+                        "(SELECT chat_id FROM story_seen ss WHERE chat_id = :userId AND ss.story_id = s.id) " +
                         (storyQuery.getType() != null ? "AND type = :type " : "") +
                         (storyQuery.getLength() != null ? "AND length = :length " : "") +
                         (storyQuery.getGenre() != null ? storyQuery.getGenre() != Genre.ANY ? "AND genre = :genre " : "" : "") +
@@ -38,7 +38,7 @@ public class StoryRepositoryImpl implements StoryRepository {
                         "ORDER BY RANDOM() " +
                         "LIMIT 1")
                 .addEntity(Story.class)
-                .setParameter("userId", userId);
+                .setParameter("userId", chatId);
 
 
         if (storyQuery.getType() != null) {
@@ -62,11 +62,11 @@ public class StoryRepositoryImpl implements StoryRepository {
 
     @Override
     @Transactional
-    public void markStoryAsSeen(long storyId, int userId) {
+    public void markStoryAsSeen(long storyId, long chatId) {
         sessionFactory.getCurrentSession()
                 .save(StorySeen.builder()
                         .storyId(storyId)
-                        .userId(userId)
+                        .chatId(chatId)
                         .build());
     }
 

@@ -12,5 +12,5 @@ import java.util.Optional;
  */
 public interface StoryService {
 
-    Optional<Story> getStory(@NotNull StoryQuery storyQuery, @NotNull int userId);
+    Optional<Story> getStory(@NotNull StoryQuery storyQuery, @NotNull long chatId);
 }

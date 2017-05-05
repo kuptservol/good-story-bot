@@ -3,41 +3,45 @@ package ru.skuptsov.telegram.bot.goodstory.processor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
-import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.StoryUserDialog;
 import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageHandler;
 import ru.skuptsov.telegram.bot.platform.handler.annotation.MessageMapping;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
 
+import static ru.skuptsov.telegram.bot.goodstory.model.dialog.StoryUserDialog.Type.READ;
+import static ru.skuptsov.telegram.bot.goodstory.processor.DialogUtils.getChatId;
+
 /**
  * @author Sergey Kuptsov
  * @since 06/06/2016
  */
 @MessageHandler
-public class StartReadingProcessor {
+public class StartReadingDialogProcessor {
     private static final String STARTREADING = "/read";
+    private static final String STARTREADING_RUS = "/читать";
     private static final String STARTREADING_OLD = "/startreading";
     private static final String START = "/start";
 
     @Autowired
     private UserDialogStore userDialogStore;
 
-    @MessageMapping(text = {STARTREADING, START, STARTREADING_OLD})
+    @MessageMapping(text = {STARTREADING, START, STARTREADING_OLD, STARTREADING_RUS})
     public Reply process(UpdateEvent updateEvent) {
         SendMessage sendMessage = new SendMessage();
 
-        Long chatId = updateEvent.getUpdate().getMessage().getChatId();
+        Long chatId = getChatId(updateEvent);
 
         sendMessage.setChatId(chatId.toString());
 
-        UserDialog userDialog = userDialogStore.startUserDialog(chatId);
+        StoryUserDialog storyUserDialog = userDialogStore.startUserDialog(chatId, READ);
 
         DialogState dialogState = DialogState.START.getNext();
 
-        userDialog.setDialogState(dialogState);
+        storyUserDialog.setDialogState(dialogState);
 
-        userDialogStore.updateUserDialog(chatId, userDialog);
+        userDialogStore.updateUserDialog(chatId, storyUserDialog);
 
         sendMessage.setText(dialogState.getDialogText());
         sendMessage.setReplyMarkup(dialogState.getReplyKeyboard());

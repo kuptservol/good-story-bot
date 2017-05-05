@@ -11,9 +11,9 @@ import javax.validation.constraints.NotNull;
  */
 public interface StoryRepository {
 
-    Story getStoryUnseen(@NotNull StoryQuery storyQuery, int userId);
+    Story getStoryUnseen(@NotNull StoryQuery storyQuery, long chatId);
 
-    void markStoryAsSeen(long storyId, int userId);
+    void markStoryAsSeen(long storyId, long chatId);
 
     void add(Story story);
 }

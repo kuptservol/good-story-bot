@@ -34,5 +34,5 @@ CREATE TABLE story_seen
 );
 
 CREATE UNIQUE INDEX story_seen_story_id_user_id_uindex
-  ON story_seen (story_id, user_id);
+  ON story_seen (story_id, chat_id);
 

@@ -1,6 +1,6 @@
 package ru.skuptsov.telegram.bot.goodstory.repository;
 
-import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.StoryUserDialog;
 
 /**
  * @author Sergey Kuptsov
@@ -8,11 +8,11 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
  */
 public interface UserDialogStore {
 
-    UserDialog startUserDialog(Long chatId);
+    StoryUserDialog startUserDialog(Long chatId, StoryUserDialog.Type type);
 
-    UserDialog getUserDialog(Long chatId);
+    StoryUserDialog getUserDialog(Long chatId);
 
-    void updateUserDialog(Long chatId, UserDialog userDialog);
+    void updateUserDialog(Long chatId, StoryUserDialog storyUserDialog);
 
     void finishUserDialog(Long chatId);
 }

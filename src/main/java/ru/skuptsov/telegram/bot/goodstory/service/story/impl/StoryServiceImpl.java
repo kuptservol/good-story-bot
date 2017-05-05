@@ -31,26 +31,26 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     @Timed(name = "story.service.get.story", absolute = true)
-    public Optional<Story> getStory(@NotNull StoryQuery storyQuery, @NotNull int userId) {
-        log.debug("Received request for story by query [{}] wirh user [{}]", storyQuery, userId);
+    public Optional<Story> getStory(@NotNull StoryQuery storyQuery, @NotNull long chatId) {
+        log.debug("Received request for story by query [{}] wirh user [{}]", storyQuery, chatId);
 
-        Optional<Story> story = ofNullable(getStoryUnseen(storyQuery, userId));
+        Optional<Story> story = ofNullable(getStoryUnseen(storyQuery, chatId));
 
-        log.debug("Received story [{}] by query [{}] with user [{}]", story, storyQuery, userId);
+        log.debug("Received story [{}] by query [{}] with user [{}]", story, storyQuery, chatId);
 
-        story.ifPresent(story_ -> storyRepository.markStoryAsSeen(story_.getId(), userId));
+        story.ifPresent(story_ -> storyRepository.markStoryAsSeen(story_.getId(), chatId));
 
         return story;
     }
 
-    private Story getStoryUnseen(@NotNull StoryQuery storyQuery, @NotNull int userId) {
+    private Story getStoryUnseen(@NotNull StoryQuery storyQuery, @NotNull long chatId) {
         Length length = storyQuery.getLength();
 
         if (storyQuery.getType() == PART) {
             storyQuery.setLength(null);
         }
 
-        Story story = storyRepository.getStoryUnseen(storyQuery, userId);
+        Story story = storyRepository.getStoryUnseen(storyQuery, chatId);
         if (story != null && storyQuery.getType() == PART) {
             story.setText(cutStoryPartToLength(story.getText(), length));
         }

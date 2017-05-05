@@ -12,6 +12,7 @@ import ru.skuptsov.telegram.bot.goodstory.model.dialog.*;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class StoryQuery {
     private Type type;
     private Length length;

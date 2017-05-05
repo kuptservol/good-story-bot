@@ -47,6 +47,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'org.springframework.boot:spring-boot-starter-jdbc'
     compile 'org.springframework.boot:spring-boot-starter-web'
+    compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.2.1'
     compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
     compile("org.springframework.boot:spring-boot-starter-jetty")
     compile "org.postgresql:postgresql:9.3-1102-jdbc41"

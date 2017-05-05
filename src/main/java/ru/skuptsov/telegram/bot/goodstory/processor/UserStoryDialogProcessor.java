@@ -5,10 +5,11 @@ import org.springframework.stereotype.Component;
 import ru.skuptsov.telegram.bot.goodstory.model.Story;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.Dialog;
 import ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState;
-import ru.skuptsov.telegram.bot.goodstory.model.dialog.UserDialog;
+import ru.skuptsov.telegram.bot.goodstory.model.dialog.StoryUserDialog;
 import ru.skuptsov.telegram.bot.goodstory.processor.story.StoryTextBuilder;
 import ru.skuptsov.telegram.bot.goodstory.repository.UserDialogStore;
 import ru.skuptsov.telegram.bot.goodstory.service.story.StoryService;
+import ru.skuptsov.telegram.bot.goodstory.service.subscribe.SubscribeService;
 import ru.skuptsov.telegram.bot.platform.client.command.Reply;
 import ru.skuptsov.telegram.bot.platform.handler.CallbackQueryDataMessageHandler;
 import ru.skuptsov.telegram.bot.platform.model.UpdateEvent;
@@ -21,13 +22,14 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.stream;
 import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.BACK_CALLBACK;
 import static ru.skuptsov.telegram.bot.goodstory.model.dialog.DialogState.START;
+import static ru.skuptsov.telegram.bot.goodstory.processor.DialogUtils.getChatIdFromCallback;
 
 /**
  * @author Sergey Kuptsov
  * @since 07/06/2016
  */
 @Component
-public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
+public class UserStoryDialogProcessor implements CallbackQueryDataMessageHandler {
 
     private final Set<String> dialogCallbacks =
             stream(DialogState.values())
@@ -35,12 +37,17 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
                     .map(Dialog::getCallbackData)
                     .collect(Collectors.toSet());
 
-
     @Autowired
     private UserDialogStore userDialogStore;
 
     @Autowired
     private StoryTextBuilder storyTextBuilder;
+
+    @Autowired
+    private SubscribeFromStoryButtonDialogProcessor subscribeFromStoryButtonDialogProcessor;
+
+    @Autowired
+    private SubscribeService subscribeService;
 
     @Autowired
     private StoryService storyService;
@@ -55,9 +62,9 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
 
         EditMessageText editMessageText = createMessage(updateEvent, chatId);
 
-        UserDialog userDialog = userDialogStore.getUserDialog(chatId);
+        StoryUserDialog storyUserDialog = userDialogStore.getUserDialog(chatId);
 
-        DialogState currentDialogState = userDialog.getDialogState();
+        DialogState currentDialogState = storyUserDialog.getDialogState();
         String callbackData = updateEvent.getUpdate().getCallbackQuery().getData();
 
         DialogState dialogState;
@@ -66,7 +73,7 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
         } else {
             if (currentDialogState != START) {
                 currentDialogState.getDialog().getEnumConstants()[0]
-                        .updateStoryQuery(userDialog.getStoryQuery(), callbackData);
+                        .updateStoryQuery(storyUserDialog.getStoryQuery(), callbackData);
             }
 
             dialogState = currentDialogState.getNext();
@@ -75,25 +82,37 @@ public class UserDialogProcessor implements CallbackQueryDataMessageHandler {
         if (dialogState != DialogState.FINISH) {
             editMessageText.setText(dialogState.getDialogText());
             editMessageText.setReplyMarkup(dialogState.getReplyKeyboard());
-            userDialog.setDialogState(dialogState);
+            storyUserDialog.setDialogState(dialogState);
 
-            userDialogStore.updateUserDialog(chatId, userDialog);
+            userDialogStore.updateUserDialog(chatId, storyUserDialog);
         } else {
-            editMessageText.setText(storyTextBuilder.build(getStory(updateEvent, userDialog)));
-            userDialogStore.finishUserDialog(chatId);
+            if (storyUserDialog.getType() == StoryUserDialog.Type.READ) {
+                editMessageText.setText(storyTextBuilder.build(getStory(updateEvent, storyUserDialog)));
+                if (showSubscribeButton(chatId)) {
+                    addSubscribeButton(editMessageText);
+                } else {
+                    userDialogStore.finishUserDialog(chatId);
+                }
+            } else if (storyUserDialog.getType() == StoryUserDialog.Type.SUBSCRIBE) {
+                return subscribeFromStoryButtonDialogProcessor.showSubscribeDialog(updateEvent);
+            }
         }
 
         return Reply.withEditMessageText(editMessageText);
     }
 
-    private Optional<Story> getStory(UpdateEvent updateEvent, UserDialog userDialog) {
-        return storyService.getStory(
-                userDialog.getStoryQuery(),
-                getUserId(updateEvent));
+    private void addSubscribeButton(EditMessageText editMessageText) {
+        editMessageText.setReplyMarkup(subscribeFromStoryButtonDialogProcessor.getReplyKeyboard());
     }
 
-    private Integer getUserId(UpdateEvent updateEvent) {
-        return updateEvent.getUpdate().getCallbackQuery().getMessage().getFrom().getId();
+    private boolean showSubscribeButton(Long chatId) {
+        return !subscribeService.get(chatId).isPresent();
+    }
+
+    private Optional<Story> getStory(UpdateEvent updateEvent, StoryUserDialog storyUserDialog) {
+        return storyService.getStory(
+                storyUserDialog.getStoryQuery(),
+                getChatIdFromCallback(updateEvent));
     }
 
     private EditMessageText createMessage(UpdateEvent updateEvent, Long chatId) {

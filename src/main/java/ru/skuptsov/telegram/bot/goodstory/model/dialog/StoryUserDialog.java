@@ -14,7 +14,14 @@ import ru.skuptsov.telegram.bot.goodstory.model.query.StoryQuery;
 @Builder
 @Getter
 @Setter
-public class UserDialog {
+public class StoryUserDialog {
     private DialogState dialogState;
     private StoryQuery storyQuery;
+    private Type type;
+    private boolean awaitingSubscriptionTime;
+
+    public enum Type {
+        READ,
+        SUBSCRIBE
+    }
 }

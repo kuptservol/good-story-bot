@@ -11,15 +11,19 @@ import javax.persistence.Table;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 @Entity
-@Table(name = "story_seen")
-public class StorySeen {
+@Table(name = "story_subscription")
+public class Subscription {
 
     @Id
     @Column(name = "chat_id")
-    public Long chatId;
+    private Long chatId;
 
-    @Column(name = "story_id")
-    public Long storyId;
+    private String time;
+
+    private String query;
+
+    private String timezone;
 }

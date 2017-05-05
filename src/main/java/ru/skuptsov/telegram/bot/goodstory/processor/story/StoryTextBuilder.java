@@ -23,6 +23,7 @@ public class StoryTextBuilder {
 
         if (story.getType() == Type.STORY) {
             builder.append(getName(story))
+                    .append(getLineSeparator())
                     .append(getLineSeparator());
         }
 
@@ -38,6 +39,7 @@ public class StoryTextBuilder {
         }
 
         builder.append(getLineSeparator())
+                .append(getLineSeparator())
                 .append(getAuthor(story))
                 .append(" ");
 
@@ -58,7 +60,7 @@ public class StoryTextBuilder {
     }
 
     private String getName(Story story) {
-        return "\"" + story.getName() + "\"";
+        return story.getName();
     }
 
     private String getYear(Story story) {
